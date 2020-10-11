@@ -1,0 +1,67 @@
+    version: '3'
+    services:
+
+      #PHP Service
+      app:
+        build:
+          context: .
+          dockerfile: Dockerfile
+        image: php:7.3-fpm
+        container_name: app
+        restart: unless-stopped
+        tty: true
+        environment:
+          SERVICE_NAME: app
+          SERVICE_TAGS: dev
+        working_dir: /var/www
+        volumes:
+          - ./:/var/www
+          - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+        networks:
+          - app-network
+
+      #Nginx Service
+      webserver:
+        image: nginx
+        container_name: webserver
+        restart: unless-stopped
+        ports:
+          - "8080:80"
+          - "443:443"
+        volumes:
+          - ./:/var/www
+          - ./nginx/conf.d/:/etc/nginx/conf.d/
+          - ./nginx/ssl/:/etc/nginx/ssl/
+
+        networks:
+          - app-network
+
+
+      mongodb:
+        image: mongo:latest
+        container_name: "mongodb"
+        environment:
+          - MONGO_INITDB_DATABASE=test
+        volumes:
+              - ./data/db:/data/db
+        networks:
+          - app-network
+
+      redis:
+          image: redis:latest
+          container_name: redis
+          volumes:
+          - ./data/redis:/data
+          ports:
+            - "8002:6379"
+          networks:
+            - app-network
+
+    #Docker Networks
+    networks:
+      app-network:
+        driver: bridge
+    #Volumes
+    volumes:
+      dbdata:
+        driver: local
