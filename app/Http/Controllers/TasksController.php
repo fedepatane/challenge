@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -32,6 +31,7 @@ class TasksController
 
       // if it is already defined , we return it
       if ($cache_string == "") $cache_string = "all"; // if we have no filter , so we return all data
+
       if ($tasks = Redis::get('tasks.' . $cache_string)) {
         $tasks = json_decode($tasks, true);
         return response()->json($tasks, 200);
@@ -46,6 +46,9 @@ class TasksController
     catch(\Exception $ex){
       return response()->json($ex->getMessage(), 500);
     }
+    catch (\Throwable $ex) {
+      return response()->json($ex->getMessage(), 500);
+    }
 
 
   }
@@ -54,7 +57,7 @@ class TasksController
 
     try{
 
-      $validate = Validator::make($request->all(), [
+      $validate = Validator::make($req->all(), [
         'title' => 'required',
         'due_date' => 'required',
       ]);
@@ -73,35 +76,7 @@ class TasksController
     catch(\Exception $ex){
       return response()->json($ex->getMessage(), 500);
     }
-
-
-  }
-
-  public function update(Request $req, $id){
-    try{
-      $task = Tasks::find($id);
-      // if the key is not set , so the value remains the same
-      $task->title = (!empty($req->input('title'))) ? ($req->input('title')) : ($task->title);
-      $task->description = (!empty($req->input('description'))) ? ($req->input('description')) : ($task->description) ;
-      $task->due_date = (!empty($req->input('due_date'))) ? ($req->input('due_date')) : ($task->due_date) ;
-      $task->updated_at = date("Y/m/d");
-      $task->completed = (!empty($req->input('completed'))) ? ($req->input('completed')) : ($task->completed) ;
-      $task->save();
-
-      return response()->json(true, 200);
-    }
-    catch(\Exception $ex){
-      return response()->json($ex->getMessage(), 500);
-    }
-  }
-
-  public function destroy($id){
-    try{
-      $task = Tasks::find($id);
-      $task->delete();
-      return response()->json(true, 200);
-    }
-    catch(\Exception $ex){
+    catch (\Throwable $ex) {
       return response()->json($ex->getMessage(), 500);
     }
   }
@@ -123,6 +98,46 @@ class TasksController
     catch(\Exception $ex){
       return response()->json($ex->getMessage(), 500);
     }
+    catch (\Throwable $ex) {
+      return response()->json($ex->getMessage(), 500);
+    }
   }
+
+  public function update(Request $req, $id){
+    try{
+      $task = Tasks::find($id);
+      // if the key is not set , so the value remains the same
+      $task->title = (!empty($req->input('title'))) ? ($req->input('title')) : ($task->title);
+      $task->description = (!empty($req->input('description'))) ? ($req->input('description')) : ($task->description) ;
+      $task->due_date = (!empty($req->input('due_date'))) ? ($req->input('due_date')) : ($task->due_date) ;
+      $task->updated_at = date("Y/m/d");
+      $task->completed = (!empty($req->input('completed'))) ? ($req->input('completed')) : ($task->completed) ;
+      $task->save();
+
+      return response()->json(true, 200);
+    }
+    catch(\Exception $ex){
+      return response()->json($ex->getMessage(), 500);
+    }
+    catch (\Throwable $ex) {
+      return response()->json($ex->getMessage(), 500);
+    }
+  }
+
+  public function destroy($id){
+    try{
+      $task = Tasks::find($id);
+      $task->delete();
+      return response()->json(true, 200);
+    }
+    catch(\Exception $ex){
+      return response()->json($ex->getMessage(), 500);
+    }
+    catch (\Throwable $ex) {
+      return response()->json($ex->getMessage(), 500);
+    }
+  }
+
+
 
 }
